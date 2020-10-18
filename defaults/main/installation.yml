@@ -1,0 +1,14 @@
+---
+
+# Remove/disable default syslog-ng logging configurations
+# Set to "no" if using syslog-ng already with custom settings
+lts_disable_syslogng_defaults: yes
+
+# APT install settings. For additional details, see:
+# https://www.syslog-ng.com/community/b/blog/posts/installing-the-latest-syslog-ng-on-ubuntu-and-other-deb-distributions
+# https://build.opensuse.org/project/show/home:laszlo_budai:syslog-ng
+lts_apt_os: xUbuntu
+lts_apt_os_version: "{{ hostvars[inventory_hostname].ansible_distribution_version }}"
+lts_apt_url: "https://download.opensuse.org/repositories/home:/laszlo_budai:/syslog-ng/{{ lts_apt_os }}_{{ lts_apt_os_version }}"
+lts_apt_key: "{{ lts_apt_url }}/Release.key"
+lts_apt_repo: "deb {{ lts_apt_url }} ./"

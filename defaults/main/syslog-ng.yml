@@ -1,0 +1,47 @@
+---
+
+# Overridable syslog-ng options and code blocks (if heavy customisation is required).
+# These are used in templates/log-to-slack.conf.j2
+# Docs: https://www.syslog-ng.com/technical-documents/doc/syslog-ng-open-source-edition/3.26/administration-guide
+
+lts_syslogng_source_options: "follow_freq(1) flags(no-parse)"
+
+lts_syslogng_custom_block: ""
+
+lts_syslogng_source: |+
+  source s_log_to_stream {
+    file("{{ lts_log_path }}" {{ lts_syslogng_source_options }});
+  };
+
+# Note: we use throttle and disk-buffer here (below) to avoid hitting the rate-limits of the
+# Slack API. Basically we shouldn't send more than 1 message per second, but that means if
+# we ever have more messages than that we need to temporarily buffer them locally.
+# See: https://api.slack.com/docs/rate-limits
+# And: https://www.syslog-ng.com/technical-documents/doc/syslog-ng-open-source-edition/3.26/administration-guide/44#TOPIC-1095150
+
+lts_syslogng_destination: |+
+  destination d_slack_webhook {
+    slack(
+      hook-url("{{ lts_slack_webhook }}")
+      author-name("{{ lts_slack_author }}")
+      throttle(1)
+      disk-buffer(
+        mem-buf-size(10000)
+        disk-buf-size(2000000)
+        reliable(yes)
+        dir("/tmp/disk-buffer")
+      )
+    );
+  };
+
+lts_syslogng_filter: |+
+  filter f_message_filter {
+    message("{{ lts_syslogng_regex }}");
+  };
+
+lts_syslogng_log: |+
+  log {
+    source(s_log_to_stream);
+    filter(f_message_filter);
+    destination(d_slack_webhook);
+  };

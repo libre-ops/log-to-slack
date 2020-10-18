@@ -1,0 +1,31 @@
+---
+
+- name: check webhook and log path are defined
+  fail:
+    msg: >
+      Slack webhook and logfile path must be defined!
+      See `lts_slack_webhook` and `lts_log_path` variables.
+  when: lts_slack_webhook == "" or lts_log_path == ""
+
+- name: install syslog-ng
+  include_tasks: install.yml
+  tags: install
+
+- name: disable syslog-ng defaults
+  include_tasks: disable_defaults.yml
+  when: lts_disable_syslogng_defaults
+  tags: disable_defaults
+
+- name: add log-to-slack configuration
+  template:
+    src: "log-to-slack.conf.j2"
+    dest: "/etc/syslog-ng/conf.d/log-to-slack.conf"
+  become: yes
+  notify: restart syslog-ng
+  tags: configure
+
+- name: add /tmp dir for buffer
+  file:
+    path: "/tmp/disk-buffer"
+    state: directory
+  become: yes

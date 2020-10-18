@@ -1,0 +1,14 @@
+---
+
+# Slack webhook, eg: https://hooks.slack.com/services/XXXXXX/XXXXXXXX/XXXXXXXXXXXXXXXX
+lts_slack_webhook: ""
+
+# Path to target logfile, eg: /var/log/syslog
+lts_log_path: ""
+
+# Default "author" field shown in Slack messages
+lts_slack_author: log-to-slack
+
+# String or regular expression to match against log lines.
+# Only *matching* lines will be sent to Slack. Default matches anything.
+lts_syslogng_regex: .
